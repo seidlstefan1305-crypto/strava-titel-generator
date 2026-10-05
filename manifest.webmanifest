@@ -1,0 +1,13 @@
+{
+  "name": "Strava Titel Generator",
+  "short_name": "Strava Titel",
+  "description": "Persönlicher Generator für Strava-Aktivitätstitel mit Streckenarchiv.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#111827",
+  "orientation": "portrait",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}

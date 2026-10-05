@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<meta name="description" content="Mobiler Generator für einheitliche Strava-Aktivitätstitel mit persönlichem Streckenarchiv.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Strava Titel Generator</title>
+<style>
+:root{--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--border:#d1d5db;--accent:#111827;--danger:#b91c1c;--dangerbg:#fee2e2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.4}
+.app{max-width:680px;margin:auto;padding:18px 14px 40px}header{margin-bottom:16px}h1{font-size:1.55rem;margin:0 0 4px}h2{font-size:1.05rem;margin:0 0 12px}.subtitle,.hint,.empty,.manage-meta{color:var(--muted);font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:650;font-size:.9rem;margin-bottom:6px}input,select,button{font:inherit}
+input,select{width:100%;min-height:48px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--text);padding:10px 12px;font-size:1rem}
+input:focus,select:focus{outline:2px solid #9ca3af;outline-offset:1px}.field{margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:11px;min-height:46px;padding:9px 14px;cursor:pointer;font-weight:650}.primary{background:var(--accent);color:#fff;width:100%}.secondary{background:#e5e7eb;color:var(--text)}.outline{background:#fff;color:var(--text);border:1px solid var(--border)}.danger{background:var(--dangerbg);color:var(--danger)}
+.button-row{display:flex;gap:8px;flex-wrap:wrap}.result{background:#f9fafb;border:1px dashed #9ca3af;border-radius:12px;padding:13px;font-weight:650;word-break:break-word;margin-bottom:10px}
+.copy-ok{display:none;color:#166534;font-size:.85rem;margin-top:8px}.search-results{margin-top:8px;display:grid;gap:7px}
+.route-option{width:100%;text-align:left;background:#fff;border:1px solid var(--border);min-height:auto;padding:10px 12px}.route-option:hover{background:#eef2ff}
+.route-name{display:block;font-weight:700}.route-meta{display:block;color:var(--muted);font-size:.82rem;margin-top:2px}
+.selected-route{background:#f3f4f6;border-radius:10px;padding:9px 11px;font-size:.9rem;margin-top:8px}.hidden{display:none!important}
+.manage-item{border-top:1px solid #e5e7eb;padding:12px 0}.manage-item:first-child{border-top:0;padding-top:0}.manage-name{font-weight:700}.small-btn{min-height:38px;padding:7px 11px;font-size:.9rem}
+.install{display:none;margin-bottom:14px}.install button{width:100%}
+@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.app{padding-left:10px;padding-right:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>🚴 Strava Titel Generator</h1>
+<div class="subtitle">Dein persönlicher Generator für einheitliche Aktivitätstitel.</div>
+</header>
+
+<section id="installBox" class="card install">
+<strong>📲 App installieren</strong>
+<div class="hint" style="margin:6px 0 10px">Installiere den Generator auf dem Startbildschirm.</div>
+<button class="primary" id="installBtn">Installieren</button>
+</section>
+
+<section class="card">
+<h2>Neue Aktivität</h2>
+<div class="field"><label for="category">Kategorie</label>
+<select id="category"><option>Longride</option><option>Genussradln</option><option>Tempo</option><option>Climbing</option><option>Duo/Group Ride</option><option>MTB</option></select></div>
+<div class="field"><label for="routeSearch">Strecke / Ort</label>
+<input id="routeSearch" type="search" placeholder="z. B. Donauradweg" autocomplete="off">
+<div id="searchResults" class="search-results"></div>
+<div id="selectedRoute" class="selected-route hidden"></div>
+<div class="hint">Tippe einen Teil des Streckennamens ein, um gespeicherte Strecken zu finden.</div></div>
+<div class="grid">
+<div class="field"><label for="distance">Distanz (km)</label><input id="distance" type="number" inputmode="decimal" min="0" step="0.1" placeholder="z. B. 82"></div>
+<div class="field"><label for="elevation">Höhenmeter (hm)</label><input id="elevation" type="number" inputmode="numeric" min="0" step="1" placeholder="z. B. 640"></div>
+</div>
+<button class="primary" id="copyBtn">📋 Titel erstellen & kopieren</button>
+<div id="copyOk" class="copy-ok"></div>
+</section>
+
+<section class="card">
+<h2>Strecke speichern</h2>
+<div class="field"><label for="newRouteName">Streckenname</label><input id="newRouteName" type="text" placeholder="z. B. Donauradweg Passau–Engelhartszell"></div>
+<div class="grid">
+<div class="field"><label for="newRouteDistance">Distanz (km)</label><input id="newRouteDistance" type="number" inputmode="decimal" min="0" step="0.1" placeholder="82"></div>
+<div class="field"><label for="newRouteElevation">Höhenmeter (hm)</label><input id="newRouteElevation" type="number" inputmode="numeric" min="0" step="1" placeholder="640"></div>
+</div>
+<button class="secondary" id="saveRouteBtn">＋ Strecke speichern</button>
+</section>
+
+<section class="card">
+<h2>Strecken verwalten</h2>
+<button class="outline" id="manageToggle">Strecken anzeigen / verwalten</button>
+<div id="manageList" class="hidden" style="margin-top:12px"></div>
+</section>
+</div>
+
+<script>
+const KEY="stravaTitleGenerator.routes.v2";let routes=load(),selected=null;
+const $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{return[]}}
+function save(){localStorage.setItem(KEY,JSON.stringify(routes))}
+function fmt(v,d=1){let n=Number(v);return Number.isFinite(n)?n.toLocaleString("de-DE",{maximumFractionDigits:d,minimumFractionDigits:0}):""}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function selectRoute(r){selected=r.id;$("routeSearch").value=r.name;$("distance").value=r.distance;$("elevation").value=r.elevation;$("searchResults").innerHTML="";$("selectedRoute").classList.remove("hidden");$("selectedRoute").innerHTML=`✓ <strong>${esc(r.name)}</strong> · ${fmt(r.distance)} km · ${fmt(r.elevation,0)} hm`}
+function search(){let q=$("routeSearch").value.trim().toLocaleLowerCase("de-DE");$("searchResults").innerHTML="";$("selectedRoute").classList.add("hidden");selected=null;if(!q)return;let m=routes.filter(r=>r.name.toLocaleLowerCase("de-DE").includes(q)).sort((a,b)=>a.name.localeCompare(b.name,"de"));if(!m.length){$("searchResults").innerHTML='<div class="empty">Keine passende gespeicherte Strecke gefunden.</div>';return}m.forEach(r=>{let b=document.createElement("button");b.className="route-option";b.innerHTML=`<span class="route-name">${esc(r.name)}</span><span class="route-meta">${fmt(r.distance)} km · ${fmt(r.elevation,0)} hm</span>`;b.onclick=()=>selectRoute(r);$("searchResults").appendChild(b)})}
+$("routeSearch").oninput=search;
+function title(){let c=$("category").value,n=$("routeSearch").value.trim(),k=Number($("distance").value),h=Number($("elevation").value);if(!n)return alert("Bitte eine Strecke oder einen Ort eingeben.");if(!Number.isFinite(k)||k<=0)return alert("Bitte eine gültige Distanz eingeben.");if(!Number.isFinite(h)||h<0)return alert("Bitte gültige Höhenmeter eingeben.");return `${c} · ${n} · ${fmt(k)} km · ${fmt(h,0)} hm`}
+$("copyBtn").onclick=async()=>{let t=title();if(!t)return;try{await navigator.clipboard.writeText(t)}catch{let x=document.createElement("textarea");x.value=t;document.body.appendChild(x);x.select();document.execCommand("copy");x.remove()}$("copyOk").textContent="✓ "+t;$("copyOk").style.display="block";setTimeout(()=>$("copyOk").style.display="none",4000)}
+$("saveRouteBtn").onclick=()=>{let n=$("newRouteName").value.trim(),k=Number($("newRouteDistance").value),h=Number($("newRouteElevation").value);if(!n)return alert("Bitte einen Streckennamen eingeben.");if(!Number.isFinite(k)||k<=0)return alert("Bitte eine gültige Distanz eingeben.");if(!Number.isFinite(h)||h<0)return alert("Bitte gültige Höhenmeter eingeben.");if(routes.some(r=>r.name.toLocaleLowerCase("de-DE")===n.toLocaleLowerCase("de-DE"))&&!confirm("Eine Strecke mit diesem Namen existiert bereits. Trotzdem neu speichern?"))return;let r={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36),name:n,distance:k,elevation:h};routes.push(r);routes.sort((a,b)=>a.name.localeCompare(b.name,"de"));save();$("newRouteName").value=$("newRouteDistance").value=$("newRouteElevation").value="";render();selectRoute(r);alert("Strecke wurde gespeichert.")};
+$("manageToggle").onclick=()=>{$("manageList").classList.toggle("hidden");render()};
+function render(){let box=$("manageList");box.innerHTML="";if(!routes.length){box.innerHTML='<div class="empty">Noch keine Strecken gespeichert.</div>';return}routes.forEach(r=>{let d=document.createElement("div");d.className="manage-item";d.innerHTML=`<div class="manage-name">${esc(r.name)}</div><div class="manage-meta">${fmt(r.distance)} km · ${fmt(r.elevation,0)} hm</div><div class="button-row"><button class="outline small-btn">✏️ Bearbeiten</button><button class="danger small-btn">🗑️ Löschen</button></div>`;d.children[2].children[0].onclick=()=>edit(r.id);d.children[2].children[1].onclick=()=>del(r.id);box.appendChild(d)})}
+function edit(id){let r=routes.find(x=>x.id===id);if(!r)return;let n=prompt("Streckenname:",r.name);if(n===null)return;let k=prompt("Distanz in km:",r.distance);if(k===null)return;let h=prompt("Höhenmeter:",r.elevation);if(h===null)return;k=Number(String(k).replace(",","."));h=Number(String(h).replace(",","."));if(!n.trim()||!Number.isFinite(k)||k<=0||!Number.isFinite(h)||h<0)return alert("Ungültige Eingaben.");r.name=n.trim();r.distance=k;r.elevation=h;save();render();if(selected===id)selectRoute(r)}
+function del(id){let r=routes.find(x=>x.id===id);if(r&&confirm(`„${r.name}“ wirklich löschen?`)){routes=routes.filter(x=>x.id!==id);save();render();if(selected===id){selected=null;$("selectedRoute").classList.add("hidden")}}}
+render();
+
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBox").style.display="block"});
+$("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$("installBox").style.display="none"};
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
